@@ -1,13 +1,13 @@
 
-import 'package:cheque_stash/components/theme_page/theme_color_card.dart';
+import 'package:cheque_stash/components/settings_page/theme_color_card.dart';
 import 'package:cheque_stash/state/state.dart';
 import 'package:cheque_stash/util/constants.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:fort/fort.dart';
 
-class ThemePickerPage extends StatelessWidget {
-  const ThemePickerPage({Key? key}) : super(key: key);
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({Key? key}) : super(key: key);
   
   @override
   Widget build(BuildContext context) {

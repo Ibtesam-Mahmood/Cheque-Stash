@@ -75,7 +75,7 @@ class _ThemeColorCardState extends State<ThemeColorCard> {
           return TweenAnimationBuilder<BorderRadius>(
             curve: Constants.DEFAULT_CURVE,
             duration: Constants.DEFAULT_DURATION,
-            tween: Tween(begin: Constants.DEFAULT_RADIUS, end: selected ? Constants.DEFAULT_RADIUS : Constants.SQUARE_RADIUS),
+            tween: Tween(begin: Constants.SQUARE_RADIUS, end: selected ? Constants.DEFAULT_RADIUS : Constants.SQUARE_RADIUS),
             builder: (context, value, child){
 
               final animation = (value.topLeft.x - Constants.SQUARE_RADIUS.topLeft.x) / (Constants.DEFAULT_RADIUS.topLeft.x - Constants.SQUARE_RADIUS.topLeft.x);

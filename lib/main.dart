@@ -1,4 +1,4 @@
-import 'package:cheque_stash/pages/theme_picker_page.dart';
+import 'package:cheque_stash/pages/home_page/home_page.dart';
 import 'package:cheque_stash/state/state.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +38,7 @@ class _Budge8AppState extends State<Budge8App> {
             theme: FlexThemeData.light(scheme: FlexScheme.values[themeIndex]),
             darkTheme: FlexThemeData.dark(scheme: FlexScheme.values[themeIndex]),
             themeMode: mode,
-            home: ThemePickerPage()
+            home: HomePage()
           );
         }
       ),
