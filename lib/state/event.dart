@@ -30,6 +30,30 @@ class SetThemeModeEvent extends _GlobalStateEvent{
 
 }
 
+class OpenAccountEvent extends _GlobalStateEvent{
+
+  final Account account;
+
+  OpenAccountEvent(this.account);
+
+}
+
+class AddTransactionToProjectedEvent extends _GlobalStateEvent{
+
+  final Transaction transaction;
+
+  AddTransactionToProjectedEvent(this.transaction);
+
+}
+
+class ApproveTransactionEvent extends _GlobalStateEvent{
+
+  final Transaction transaction;
+
+  ApproveTransactionEvent(this.transaction);
+
+}
+
 /*
  
       _        _   _                 
@@ -40,3 +64,14 @@ class SetThemeModeEvent extends _GlobalStateEvent{
                                      
  
 */
+
+void wipeDataAction(Store<GlobalState> store) async {
+  store.dispatch(SetState(GlobalState.initial()));
+}
+
+ThunkAction<GlobalState> addTransactionAction(Transaction transaction){
+  return (Store<GlobalState> store) async {
+    store.dispatch(AddTransactionToProjectedEvent(transaction));
+    store.dispatch(ApproveTransactionEvent(transaction));
+  };
+}

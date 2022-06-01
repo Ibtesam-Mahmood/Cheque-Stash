@@ -35,8 +35,36 @@ class _Budge8AppState extends State<Budge8App> {
             title: 'Budge-8',
 
             // Custom theme
-            theme: FlexThemeData.light(scheme: FlexScheme.values[themeIndex]),
-            darkTheme: FlexThemeData.dark(scheme: FlexScheme.values[themeIndex]),
+            // theme: FlexThemeData.light(),
+            // darkTheme: FlexThemeData.dark(),
+            theme: FlexThemeData.light(
+              scheme: FlexScheme.values[themeIndex],
+              surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+              blendLevel: 20,
+              appBarOpacity: 0.95,
+              subThemesData: const FlexSubThemesData(
+                blendOnLevel: 20,
+                blendOnColors: false,
+              ),
+              visualDensity: FlexColorScheme.comfortablePlatformDensity,
+              useMaterial3: true,
+              // To use the playground font, add GoogleFonts package and uncomment
+              // fontFamily: GoogleFonts.notoSans().fontFamily,
+            ),
+            darkTheme: FlexThemeData.dark(
+              scheme: FlexScheme.values[themeIndex],
+              surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+              blendLevel: 15,
+              appBarStyle: FlexAppBarStyle.background,
+              appBarOpacity: 0.90,
+              subThemesData: const FlexSubThemesData(
+                blendOnLevel: 30,
+              ),
+              visualDensity: FlexColorScheme.comfortablePlatformDensity,
+              useMaterial3: true,
+              // To use the playground font, add GoogleFonts package and uncomment
+              // fontFamily: GoogleFonts.notoSans().fontFamily,
+            ),
             themeMode: mode,
             home: HomePage()
           );
