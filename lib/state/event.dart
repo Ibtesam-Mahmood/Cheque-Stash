@@ -12,7 +12,13 @@ part of 'state.dart';
  
 */
 
-abstract class _GlobalStateEvent{}
+abstract class _GlobalStateEvent{
+
+  static const String budget_destination = 'budget';
+  static const String projected_destination = 'projected';
+  static const String transaction_destination = 'transaction';
+
+}
 
 class SetFlexThemeIndexEvent extends _GlobalStateEvent{
 
@@ -54,6 +60,34 @@ class ApproveTransactionEvent extends _GlobalStateEvent{
 
 }
 
+class AddSavedTypeEvent extends _GlobalStateEvent{
+
+  final String type;
+
+  AddSavedTypeEvent(this.type);
+
+}
+
+class EditTransactionEvent extends _GlobalStateEvent{
+
+  final String destination;
+  final Transaction transaction;
+
+  EditTransactionEvent(this.transaction) : destination = _GlobalStateEvent.transaction_destination;
+  EditTransactionEvent.budget(this.transaction) : destination = _GlobalStateEvent.budget_destination;
+  EditTransactionEvent.projected(this.transaction) : destination = _GlobalStateEvent.projected_destination;
+}
+
+class DeleteTransactionEvent extends _GlobalStateEvent{
+  
+  final String destination;
+  final String transactionID;
+
+  DeleteTransactionEvent(this.transactionID) : destination = _GlobalStateEvent.transaction_destination;
+  DeleteTransactionEvent.budget(this.transactionID) : destination = _GlobalStateEvent.budget_destination;
+  DeleteTransactionEvent.projected(this.transactionID) : destination = _GlobalStateEvent.projected_destination;
+}
+
 /*
  
       _        _   _                 
@@ -73,5 +107,29 @@ ThunkAction<GlobalState> addTransactionAction(Transaction transaction){
   return (Store<GlobalState> store) async {
     store.dispatch(AddTransactionToProjectedEvent(transaction));
     store.dispatch(ApproveTransactionEvent(transaction));
+  };
+}
+
+ThunkAction<GlobalState> editTransactionAction(Transaction transaction, {bool inBudget = false}){
+  return (Store<GlobalState> store) async {
+    if(inBudget){
+      store.dispatch(EditTransactionEvent.budget(transaction));
+    }
+    else{
+      store.dispatch(EditTransactionEvent(transaction));
+      store.dispatch(EditTransactionEvent.projected(transaction));
+    }
+  };
+}
+
+ThunkAction<GlobalState> deleteTransactionAction(Transaction transaction, {bool inBudget = false}){
+  return (Store<GlobalState> store) async {
+    if(inBudget){
+      store.dispatch(DeleteTransactionEvent.budget(transaction.id));
+    }
+    else{
+      store.dispatch(DeleteTransactionEvent(transaction.id));
+      store.dispatch(DeleteTransactionEvent.projected(transaction.id));
+    }
   };
 }

@@ -2,7 +2,12 @@
 
 // ignore_for_file: non_constant_identifier_names, constant_identifier_names
 
+import 'package:cheque_stash/components/transactions/transaction_tile.dart';
+import 'package:cheque_stash/models/transaction.dart';
+import 'package:cheque_stash/state/state.dart';
+import 'package:cheque_stash/util/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:fort/fort.dart';
 
 class Constants {
 
@@ -17,5 +22,54 @@ class Constants {
 
   static BorderRadius get DEFAULT_RADIUS => BorderRadius.circular(16);
   static BorderRadius get SQUARE_RADIUS => BorderRadius.circular(8);
+
+}
+
+class Functions {
+
+  static TransactionType transactionType(BuildContext context, Transaction transaction){
+
+    final accountMap = StoreProvider.of<GlobalState>(context).state.accounts.toMap<String>((a) => a.name);
+    
+    if(accountMap[transaction.toAccount]?.yours == true){
+      // In bound transaction
+      if(accountMap[transaction.fromAccount]?.yours == true) {
+        // Transfer in between accounts
+        return TransactionType.transfer;
+      }
+      else{
+        // Income
+        return TransactionType.income;
+      }
+    }
+    else{
+      // Out bound transaction
+      return TransactionType.outgoing;
+    }
+  }
+
+  static Color transactionTypeColor(BuildContext context, TransactionType type){
+    final theme = Theme.of(context).colorScheme;
+    switch (type) {
+      case TransactionType.income:
+        return theme.primary;
+      case TransactionType.transfer:
+        return theme.secondary;
+      default: // outgoing
+        return theme.error;
+    }
+  }
+
+  static Color onTransactionTypeColor(BuildContext context, TransactionType type){
+    final theme = Theme.of(context).colorScheme;
+    switch (type) {
+      case TransactionType.income:
+        return theme.onPrimary;
+      case TransactionType.transfer:
+        return theme.onSecondary;
+      default: // outgoing
+        return theme.onError;
+    }
+  }
 
 }

@@ -1,4 +1,5 @@
 import 'package:cheque_stash/models/transaction.dart';
+import 'package:cheque_stash/pages/transactions/edit_transaction_page.dart';
 import 'package:cheque_stash/state/state.dart';
 import 'package:cheque_stash/util/constants.dart';
 import 'package:cheque_stash/util/extensions.dart';
@@ -18,49 +19,25 @@ class TransactionTile extends StatelessWidget {
   final Transaction transaction;
 
   const TransactionTile({Key? key, required this.transaction}) : super(key: key);
-  
-  TransactionType transactionType(BuildContext context){
-
-    final accountMap = StoreProvider.of<GlobalState>(context).state.accounts.toMap<String>((a) => a.name);
-    
-    if(accountMap[transaction.toAccount]?.yours == true){
-      // In bound transaction
-      if(accountMap[transaction.fromAccount]?.yours == true) {
-        // Transfer in between accounts
-        return TransactionType.transfer;
-      }
-      else{
-        // Income
-        return TransactionType.income;
-      }
-    }
-    else{
-      // Out bound transaction
-      return TransactionType.outgoing;
-    }
-  }
-
-  Color transactionTypeColor(BuildContext context, TransactionType type){
-    final theme = Theme.of(context).colorScheme;
-    switch (type) {
-      case TransactionType.income:
-        return theme.primary;
-      case TransactionType.transfer:
-        return theme.secondary;
-      default: // outgoing
-        return theme.error;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
 
-    final type = transactionType(context);
+    final type = Functions.transactionType(context, transaction);
 
     return Card(
       child: InkWell(
-        onTap: (){
-          //Open account page
+        onTap: () async {
+
+          final globalStore = StoreProvider.of<GlobalState>(context);
+
+          //Open transaction page
+          final newTransaction = await Navigator.of(context).to(EditTransactionPage(transaction: transaction,));
+
+          if(newTransaction != null && newTransaction != transaction){
+            // Edit transaction
+            globalStore.dispatch(editTransactionAction(newTransaction));
+          }
         },
         child: Column(
           children: [
@@ -75,7 +52,7 @@ class TransactionTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: transactionTypeColor(context, type),
+                    color: Functions.transactionTypeColor(context, type),
                     width: 2
                   )
                 ),
@@ -92,13 +69,8 @@ class TransactionTile extends StatelessWidget {
               title: Text(transaction.name),
               subtitle: Text(transaction.type),
 
-              trailing: IconButton(
-                icon: const Icon(
-                  Icons.more_horiz
-                ),
-                onPressed: (){
-                  // Open edit sheet
-                },
+              trailing: const Icon(
+                Icons.more_horiz
               ),
             ),
 
@@ -115,7 +87,7 @@ class TransactionTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: Constants.DEFAULT_RADIUS,
                       border: Border.all(
-                        color: transactionTypeColor(context, type),
+                        color: Functions.transactionTypeColor(context, type),
                         width: 0.5
                       )
                     ),
@@ -123,7 +95,7 @@ class TransactionTile extends StatelessWidget {
                       fit: BoxFit.contain,
                       child: Text(
                         transaction.fromAccount,
-                        style: const TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -153,21 +125,17 @@ class TransactionTile extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       borderRadius: Constants.DEFAULT_RADIUS,
-                      color: transactionTypeColor(context, type)
+                      color: Functions.transactionTypeColor(context, type)
                     ),
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Text(
                         transaction.toAccount,
-                        style: const TextStyle(fontSize: 18),
+                        style: TextStyle(fontSize: 18, color: Functions.onTransactionTypeColor(context, type), fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
 
-                  // Text(
-                  //   transaction.toAccount.isEmpty ? 'Void' : transaction.toAccount,
-                  //   style: TextStyle(fontSize: 18),
-                  // ),
                 ],
               ),
             )

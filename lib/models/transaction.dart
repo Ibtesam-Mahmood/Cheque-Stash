@@ -28,7 +28,7 @@ class Transaction {
     required this.type,
     required this.fromAccount,
     required this.toAccount,
-  }) : id = UniqueKey().toString();
+  }): id = UniqueKey().toString();
 
 
   Transaction recreateWith({
@@ -128,7 +128,9 @@ extension TransactionListExtension on List<Transaction>{
 
   List<Map<String, dynamic>> toJson() => map<Map<String, dynamic>>((a) => a.toJson()).toList();
 
-  static List<Transaction> fromJson(List<dynamic> json) => json.map((e) => Transaction.fromJson(e)).toList(); 
+  static List<Transaction> fromJson(List<dynamic> json) => json.map((e) => Transaction.fromJson(e)).toList();
+
+  void dateSorted() => sort((a, b) => b.date.compareTo(a.date));
 
   double getAccountValue(String account){
     double value = 0;

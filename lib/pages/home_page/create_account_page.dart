@@ -180,7 +180,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     type: 'Initial Value'
                   )));
                 }
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(account);
               } : null, 
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 48, vertical: 12),

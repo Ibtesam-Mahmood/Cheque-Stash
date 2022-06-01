@@ -1,5 +1,6 @@
 import 'package:cheque_stash/models/account.dart';
 import 'package:cheque_stash/models/transaction.dart';
+import 'package:cheque_stash/util/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:fort/fort.dart';
 
@@ -20,6 +21,8 @@ class GlobalState extends FortState<GlobalState>{
 
   final List<Transaction> projectedTransactions;
 
+  final List<String> savedTypes;
+
   final DateTime startDate;
 
   GlobalState({
@@ -29,6 +32,7 @@ class GlobalState extends FortState<GlobalState>{
     required this.budget,
     required this.transactions,
     required this.projectedTransactions,
+    required this.savedTypes,
     required this.startDate,
   });
 
@@ -36,6 +40,7 @@ class GlobalState extends FortState<GlobalState>{
     themeFlexScheme: 0,
     themeMode: ThemeMode.system,
     startDate: DateTime.now(),
+    savedTypes: ['Initial Value'],
     accounts: [],
     budget: [],
     transactions: [],
@@ -46,6 +51,7 @@ class GlobalState extends FortState<GlobalState>{
     return GlobalState(
       themeFlexScheme: json['themeFlexScheme'],
       themeMode: ThemeMode.values[json['themeMode']],
+      savedTypes: json['savedTypes'],
       accounts: AccountListExtension.fromJson(json['accounts']),
       budget: TransactionListExtension.fromJson(json['budget']),
       transactions: TransactionListExtension.fromJson(json['transactions']),
@@ -58,6 +64,7 @@ class GlobalState extends FortState<GlobalState>{
   dynamic toJson() => {
     'themeFlexScheme': themeFlexScheme,
     'themeMode': themeMode.index,
+    'savedTypes': savedTypes,
     'accounts': accounts.toJson(),
     'budget': budget.toJson(),
     'transactions': transactions.toJson(),
