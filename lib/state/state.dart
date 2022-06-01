@@ -34,7 +34,7 @@ class GlobalState extends FortState<GlobalState>{
 
   factory GlobalState.initial() => GlobalState(
     themeFlexScheme: 0,
-    themeMode: ThemeMode.light,
+    themeMode: ThemeMode.system,
     startDate: DateTime.now(),
     accounts: [],
     budget: [],

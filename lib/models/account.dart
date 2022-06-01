@@ -12,24 +12,29 @@ class Account {
   
   final String name;
   final AccountType type;
+  final bool yours;
   
   Account({
     required this.name,
     required this.type,
+    required this.yours,
   });
 
   factory Account.empty() => Account(
     name: '',
-    type: AccountType.other
+    type: AccountType.other,
+    yours: true,
   );
 
   Account copyWith({
     String? name,
     AccountType? type,
+    bool? yours,
   }) {
     return Account(
       name: name ?? this.name,
       type: type ?? this.type,
+      yours: yours ?? this.yours,
     );
   }
 
@@ -37,6 +42,7 @@ class Account {
     return <String, dynamic>{
       'name': name,
       'type': type.index,
+      'yours': yours,
     };
   }
 
@@ -44,11 +50,12 @@ class Account {
     return Account(
       name: map['name'] as String,
       type: AccountType.values[map['type']],
+      yours: map['yours'] as bool,
     );
   }
 
   @override
-  String toString() => 'Account(name: $name, type: $type)';
+  String toString() => 'Account(name: $name, type: $type, yours: $yours)';
 
   @override
   bool operator ==(Object other) {
@@ -56,11 +63,12 @@ class Account {
   
     return other is Account &&
       other.name == name &&
-      other.type == type;
+      other.type == type &&
+      other.yours == yours;
   }
 
   @override
-  int get hashCode => name.hashCode ^ type.hashCode;
+  int get hashCode => name.hashCode ^ type.hashCode ^ yours.hashCode;
 }
 
 extension AccountListExtension on List<Account>{

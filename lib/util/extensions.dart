@@ -8,3 +8,14 @@ extension NavigatorStateExtension on NavigatorState {
   ));
 
 }
+
+extension ListExtension<T> on List<T> {
+
+  Map<S, T> toMap<S>(S Function(T item) accessor) {
+    final Map<S, T> map = {};
+    for (var element in this) {
+      map[accessor(element)] = element;
+    }
+    return map;
+  }
+}

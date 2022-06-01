@@ -9,16 +9,16 @@ class Transaction {
   final double amount;
   final String name;
   final String type;
-  final Account from;
-  final Account to;
+  final String fromAccount;
+  final String toAccount;
   Transaction({
     required this.id,
     required this.date,
     required this.amount,
     required this.name,
     required this.type,
-    required this.from,
-    required this.to,
+    required this.fromAccount,
+    required this.toAccount,
   });
 
   Transaction.create({
@@ -26,8 +26,8 @@ class Transaction {
     required this.amount,
     required this.name,
     required this.type,
-    required this.from,
-    required this.to,
+    required this.fromAccount,
+    required this.toAccount,
   }) : id = UniqueKey().toString();
 
 
@@ -36,16 +36,16 @@ class Transaction {
     double? amount,
     String? name,
     String? type,
-    Account? from,
-    Account? to,
+    String? fromAccount,
+    String? toAccount,
   }) {
     return Transaction.create(
       date: date ?? this.date,
       amount: amount ?? this.amount,
       name: name ?? this.name,
       type: type ?? this.type,
-      from: from ?? this.from,
-      to: to ?? this.to,
+      fromAccount: fromAccount ?? this.fromAccount,
+      toAccount: toAccount ?? this.toAccount,
     );
   }
 
@@ -55,8 +55,8 @@ class Transaction {
     double? amount,
     String? name,
     String? type,
-    Account? from,
-    Account? to,
+    String? fromAccount,
+    String? toAccount,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -64,8 +64,8 @@ class Transaction {
       amount: amount ?? this.amount,
       name: name ?? this.name,
       type: type ?? this.type,
-      from: from ?? this.from,
-      to: to ?? this.to,
+      fromAccount: fromAccount ?? this.fromAccount,
+      toAccount: toAccount ?? this.toAccount,
     );
   }
 
@@ -76,8 +76,8 @@ class Transaction {
       'amount': amount,
       'name': name,
       'type': type,
-      'from': from.toJson(),
-      'to': to.toJson(),
+      'fromAccount': fromAccount,
+      'toAccount': toAccount,
     };
   }
 
@@ -88,14 +88,14 @@ class Transaction {
       amount: map['amount'] as double,
       name: map['name'] as String,
       type: map['type'] as String,
-      from: Account.fromJson(map['from'] as Map<String,dynamic>),
-      to: Account.fromJson(map['to'] as Map<String,dynamic>),
+      fromAccount: map['fromAccount'] as String,
+      toAccount: map['toAccount'] as String,
     );
   }
 
   @override
   String toString() {
-    return 'Transaction(id: $id, date: $date, amount: $amount, name: $name, type: $type, from: $from, to: $to)';
+    return 'Transaction(id: $id, date: $date, amount: $amount, name: $name, type: $type, from: $fromAccount, to: $toAccount)';
   }
 
   @override
@@ -108,8 +108,8 @@ class Transaction {
       other.amount == amount &&
       other.name == name &&
       other.type == type &&
-      other.from == from &&
-      other.to == to;
+      other.fromAccount == fromAccount &&
+      other.toAccount == toAccount;
   }
 
   @override
@@ -119,8 +119,8 @@ class Transaction {
       amount.hashCode ^
       name.hashCode ^
       type.hashCode ^
-      from.hashCode ^
-      to.hashCode;
+      fromAccount.hashCode ^
+      toAccount.hashCode;
   }
 }
 
@@ -133,11 +133,11 @@ extension TransactionListExtension on List<Transaction>{
   double getAccountValue(String account){
     double value = 0;
     for (var transaction in this) {
-      if(transaction.to.name == account){
+      if(transaction.toAccount == account){
         // Add value
         value += transaction.amount;
       }
-      if(transaction.from.name == account){
+      if(transaction.fromAccount == account){
         // Remove value
         value -= transaction.amount;
       }

@@ -24,6 +24,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   AccountType? type;
 
+  bool yourAccount = true;
+
   bool uniqueAccount = false;
   double initialValue = 0.0;
 
@@ -41,91 +43,127 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         child: Column(
           children: [
 
-            const Text(
-              'Unique Account Name',
-              style: TextStyle(fontSize: 16,),
-            ),
+            Expanded(
+              child: ListView(
+                children: [
+                  const Text(
+                    'Unique Account Name',
+                    style: TextStyle(fontSize: 16,),
+                  ),
 
-            const SizedBox(height: Constants.MEDIUM_PADDING,),
+                  const SizedBox(height: Constants.MEDIUM_PADDING,),
 
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Name',
+                  TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                    ),
+                  ),
+
+                  if(yourAccount)
+                    ...[
+                      const SizedBox(height: Constants.LARGE_PADDING,),
+
+                      const Text(
+                        'Initial Value',
+                        style: TextStyle(fontSize: 16,),
+                      ),
+
+                      const SizedBox(height: Constants.MEDIUM_PADDING,),
+
+                      TextField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Amount',
+                          hintText: '0.0',
+                          prefixIcon: Icon(
+                            Icons.monetization_on_outlined,
+                          )
+                        ),
+                        onChanged: (value){
+                          double? parsed = double.tryParse(value.replaceAll(' ', ''));
+                          if(parsed != null){
+                            setState(() {
+                              initialValue = parsed;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+
+                  const SizedBox(height: Constants.LARGE_PADDING,),
+
+                  const Text(
+                    'Account Type',
+                    style: TextStyle(fontSize: 16,),
+                  ),
+
+                  const SizedBox(height: Constants.SMALL_PADDING,),
+
+                  PopupMenuButton(
+                    onSelected: (newType){
+                      setState(() {
+                        type = newType as AccountType;
+                      });
+                    },
+                    child: Card(
+                      child: Container(
+                        width: 200,
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: Text(
+                            type?.toString().replaceAll('AccountType.', '').capitalize ?? 'Select Type', 
+                            style: TextStyle(fontSize: 16, fontWeight: type == null ? null : FontWeight.bold),
+                          )
+                        ),
+                      ),
+                    ),
+                    itemBuilder: (context) => AccountType.values.map((e){
+                      return PopupMenuItem(
+                        value: e,
+                        child: Text(e.toString().replaceAll('AccountType.', '').capitalize),
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: Constants.LARGE_PADDING,),
+
+                  Row(
+                    children: [
+                      const Text(
+                        'Does the Account belong to you?',
+                      ),
+
+                      const Spacer(),
+
+                      const Text('No'),
+
+                      Switch(
+                        value: yourAccount, 
+                        onChanged: (value){
+                          setState(() {
+                            yourAccount = value;
+                          });
+                        }
+                      ),
+
+                      const Text('Yes'),
+                    ],
+                  ),
+
+                ],
               ),
-            ),
-
-            const SizedBox(height: Constants.LARGE_PADDING,),
-
-            const Text(
-              'Initial Value',
-              style: TextStyle(fontSize: 16,),
-            ),
-
-            const SizedBox(height: Constants.MEDIUM_PADDING,),
-
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Amount',
-                hintText: '0.0',
-                prefixIcon: Icon(
-                  Icons.monetization_on_outlined,
-                )
-              ),
-              onChanged: (value){
-                double? parsed = double.tryParse(value.replaceAll(' ', ''));
-                if(parsed != null){
-                  setState(() {
-                    initialValue = parsed;
-                  });
-                }
-              },
-            ),
-
-            const SizedBox(height: Constants.LARGE_PADDING,),
-
-            const Text(
-              'Account Type',
-              style: TextStyle(fontSize: 16,),
             ),
 
             const SizedBox(height: Constants.SMALL_PADDING,),
-
-            PopupMenuButton(
-              onSelected: (newType){
-                setState(() {
-                  type = newType as AccountType;
-                });
-              },
-              child: Card(
-                child: Container(
-                  width: 200,
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: Text(
-                      type?.toString().replaceAll('AccountType.', '').capitalize ?? 'Select Type', 
-                      style: TextStyle(fontSize: 16, fontWeight: type == null ? null : FontWeight.bold),
-                    )
-                  ),
-                ),
-              ),
-              itemBuilder: (context) => AccountType.values.map((e){
-                return PopupMenuItem(
-                  value: e,
-                  child: Text(e.toString().replaceAll('AccountType.', '').capitalize),
-                );
-              }).toList(),
-            ),
-
-            Spacer(),
 
             ElevatedButton(
               onPressed: uniqueAccount && type != null && initialValue >= 0 ? (){
 
                 final account = Account(
                   name: controller.text,
-                  type: type!
+                  type: type!,
+                  yours: yourAccount
                 );
 
                 //Create Account
@@ -135,10 +173,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 if(initialValue > 0){
                   StoreProvider.of<GlobalState>(context).dispatch(addTransactionAction(Transaction.create(
                     name: 'Initial Value for ${account.name}',
-                    amount: initialValue,
+                    amount: yourAccount ? initialValue : 0,
                     date: DateTime.now(),
-                    from: Account.empty(),
-                    to: account,
+                    fromAccount: '',
+                    toAccount: account.name,
                     type: 'Initial Value'
                   )));
                 }
