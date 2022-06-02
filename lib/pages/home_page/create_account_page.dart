@@ -172,7 +172,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
                 //Add transaction
                 if(initialValue > 0){
-                  globalStore.dispatch(addTransactionAction(Transaction.create(
+                  globalStore.dispatch(createInitialTransactionAction(Transaction.create(
                     name: 'Initial Value for ${account.name}',
                     amount: yourAccount ? initialValue : 0,
                     date: globalStore.state.startDate,

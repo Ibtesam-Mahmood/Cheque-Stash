@@ -138,12 +138,7 @@ List<Transaction> _budgetStateReducer(GlobalState state, _GlobalStateEvent event
 }
 
 List<Transaction> _transactionStateReducer(GlobalState state, _GlobalStateEvent event){
-  if(event is _SetStartDateEvent){
-    return [...state.projectedTransactions.where((element) => element.type == 'Initial Value')];
-  }
-
-
-  else if(event is AddTransactionEvent && event.destination == TransactionListType.transactions){
+  if(event is AddTransactionEvent && event.destination == TransactionListType.transactions){
     // Map all the transactions
     final transactions = state.transactions.toMap<String>((t) => t.id);
 

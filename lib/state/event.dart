@@ -77,7 +77,12 @@ class AddTransactionEvent extends _GlobalStateEvent{
   final TransactionListType destination;
   final Transaction transaction;
 
-  AddTransactionEvent(this.transaction) : destination = TransactionListType.transactions;
+  AddTransactionEvent({
+    required this.destination,
+    required this.transaction
+  });
+
+  AddTransactionEvent.transaction(this.transaction) : destination = TransactionListType.transactions;
   AddTransactionEvent.budget(this.transaction) : destination = TransactionListType.budget;
   AddTransactionEvent.projected(this.transaction) : destination = TransactionListType.projected;
 }
@@ -87,7 +92,12 @@ class EditTransactionEvent extends _GlobalStateEvent{
   final TransactionListType destination;
   final Transaction transaction;
 
-  EditTransactionEvent(this.transaction) : destination = TransactionListType.transactions;
+  EditTransactionEvent({
+    required this.destination,
+    required this.transaction
+  });
+
+  EditTransactionEvent.transaction(this.transaction) : destination = TransactionListType.transactions;
   EditTransactionEvent.budget(this.transaction) : destination = TransactionListType.budget;
   EditTransactionEvent.projected(this.transaction) : destination = TransactionListType.projected;
 }
@@ -97,7 +107,12 @@ class DeleteTransactionEvent extends _GlobalStateEvent{
   final TransactionListType destination;
   final String transactionID;
 
-  DeleteTransactionEvent(this.transactionID) : destination = TransactionListType.transactions;
+  DeleteTransactionEvent({
+    required this.destination,
+    required this.transactionID
+  });
+
+  DeleteTransactionEvent.transaction(this.transactionID) : destination = TransactionListType.transactions;
   DeleteTransactionEvent.budget(this.transactionID) : destination = TransactionListType.budget;
   DeleteTransactionEvent.projected(this.transactionID) : destination = TransactionListType.projected;
 }
@@ -152,7 +167,7 @@ ThunkAction<GlobalState> computeBudgeSinceAction(DateTime date){
         if(lastDay && budgetMap[currentDay.day + 3] != null)
           ...budgetMap[currentDay.day + 3]!,
       ];
-      
+
       for(var budget in addedTransactions){
         transactions.add(budget.recreateWith(
           date: currentDay,
@@ -162,43 +177,14 @@ ThunkAction<GlobalState> computeBudgeSinceAction(DateTime date){
       currentDay = currentDay.add(const Duration(days: 1));
     }
 
-    store.dispatch(BatchAddTransactionListEvent(transactions));
+    store.dispatch(BatchAddTransactionListEvent.projected(transactions));
     store.dispatch(_SetLastBudgetFromDateEvent(currentDay));
   };
 }
 
-ThunkAction<GlobalState> addTransactionAction(Transaction transaction, {bool inBudget = false}){
+ThunkAction<GlobalState> createInitialTransactionAction(Transaction transaction){
   return (Store<GlobalState> store) async {
-    if(inBudget){
-      store.dispatch(AddTransactionEvent.budget(transaction));
-    }
-    else{
-      store.dispatch(AddTransactionEvent.projected(transaction));
-      store.dispatch(AddTransactionEvent(transaction));
-    }
-  };
-}
-
-ThunkAction<GlobalState> editTransactionAction(Transaction transaction, {bool inBudget = false}){
-  return (Store<GlobalState> store) async {
-    if(inBudget){
-      store.dispatch(EditTransactionEvent.budget(transaction));
-    }
-    else{
-      store.dispatch(EditTransactionEvent(transaction));
-      store.dispatch(EditTransactionEvent.projected(transaction));
-    }
-  };
-}
-
-ThunkAction<GlobalState> deleteTransactionAction(Transaction transaction, {bool inBudget = false}){
-  return (Store<GlobalState> store) async {
-    if(inBudget){
-      store.dispatch(DeleteTransactionEvent.budget(transaction.id));
-    }
-    else{
-      store.dispatch(DeleteTransactionEvent(transaction.id));
-      store.dispatch(DeleteTransactionEvent.projected(transaction.id));
-    }
+    store.dispatch(AddTransactionEvent.projected(transaction));
+    store.dispatch(AddTransactionEvent.transaction(transaction));
   };
 }

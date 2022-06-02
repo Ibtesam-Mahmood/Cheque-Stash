@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Budge-8'),
+        title: const Text('Home'),
       ),
       drawer: const MainDrawer(),
       body: StoreConnector<GlobalState, List<Account>>(

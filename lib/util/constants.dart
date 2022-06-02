@@ -4,6 +4,7 @@
 
 import 'package:cheque_stash/components/transactions/transaction_tile.dart';
 import 'package:cheque_stash/models/transaction.dart';
+import 'package:cheque_stash/pages/transactions/edit_transaction_page.dart';
 import 'package:cheque_stash/state/state.dart';
 import 'package:cheque_stash/util/extensions.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +71,21 @@ class Functions {
       default: // outgoing
         return theme.onErrorContainer;
     }
+  }
+
+  /// A way for projected transactions to become copied over
+  static void cloneProjectedTransaction(BuildContext context, Transaction transaction) async {
+    
+    final globalStore = StoreProvider.of<GlobalState>(context);
+
+    // Open the edit page with the current transaction
+    Transaction? newTransaction = await Navigator.of(context).to(EditTransactionPage(transaction: transaction, mode: TransactionListType.transactions));
+
+    //If a transaction if returned clone it
+    if(newTransaction != null){
+      globalStore.dispatch(AddTransactionEvent.transaction(newTransaction));
+    }
+
   }
 
 }

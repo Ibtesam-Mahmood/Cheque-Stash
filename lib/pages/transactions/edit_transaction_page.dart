@@ -14,9 +14,9 @@ import 'package:intl/intl.dart';
 class EditTransactionPage extends StatefulWidget {
 
   final Transaction? transaction;
-  final bool budgetMode;
+  final TransactionListType mode;
 
-  const EditTransactionPage({Key? key, this.transaction, this.budgetMode = false}) : super(key: key);
+  const EditTransactionPage({Key? key, this.transaction, required this.mode}) : super(key: key);
 
   @override
   State<EditTransactionPage> createState() => _EditTransactionPageState();
@@ -24,12 +24,14 @@ class EditTransactionPage extends StatefulWidget {
 
 class _EditTransactionPageState extends State<EditTransactionPage> {
 
+  late final bool budgetMode = widget.mode == TransactionListType.budget;
+
   late String name = widget.transaction?.name ?? '';
   late String? type = widget.transaction?.type;
   late double amount = widget.transaction?.amount ?? 0.0;
   late String accountFrom = widget.transaction?.fromAccount ?? '';
   late String accountTo = widget.transaction?.toAccount ?? '';
-  late DateTime? date = widget.transaction?.date ?? (widget.budgetMode ? null : DateTime.now());
+  late DateTime? date = widget.transaction?.date ?? (budgetMode ? null : DateTime.now());
 
   bool get canSave => name.isNotEmpty &&
     type != null &&
@@ -101,29 +103,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.transaction == null ? 'Create' : 'Edit'} ${widget.budgetMode ? 'Budget' : 'Transaction'}'),
-        actions: [
-          if(widget.transaction != null)
-            IconButton(
-              icon: Icon(
-                Icons.delete,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              onPressed: (){
-                // Send request to delete transaction and close page after confirming
-                showDialog(context: context, builder: SimpleAlertDialog.build(
-                  title: 'Delete Transaction', 
-                  description: 'Are you sure you want to delete this transaction, it will reflect in your account value and expected value.',
-                  continueColor: Theme.of(context).colorScheme.error,
-                  onContinue: (){
-                    //Delete transaction
-                    StoreProvider.of<GlobalState>(context).dispatch(deleteTransactionAction(widget.transaction!, inBudget: widget.budgetMode));
-                    Navigator.of(context).pop();
-                  }
-                ));
-              },
-            )
-        ],
+        title: Text('${widget.transaction == null ? 'Create' : 'Edit'} ${budgetMode ? 'Budget' : 'Transaction'}'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(Constants.DEFAULT_PADDING),
@@ -333,13 +313,13 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
                           date == null ? 'Select Day' : (
-                            widget.budgetMode ? date!.toBudgetDayFormat() : DateFormat('EEE MMM dd, yyyy').format(date!)
+                            budgetMode ? date!.toBudgetDayFormat() : DateFormat('EEE MMM dd, yyyy').format(date!)
                           ),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                       onPressed: () async {
-                        final newDate = widget.budgetMode ? await BudgetDateAlertDialog.show(context: context) : await showDatePicker(
+                        final newDate = budgetMode ? await BudgetDateAlertDialog.show(context: context) : await showDatePicker(
                           context: context,
                           initialDate: date!,
                           firstDate: DateTime(2000),

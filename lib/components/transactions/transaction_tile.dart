@@ -1,12 +1,12 @@
+import 'package:cheque_stash/components/transactions/transaction_account_card.dart';
+import 'package:cheque_stash/components/transactions/transaction_date_circle.dart';
 import 'package:cheque_stash/models/transaction.dart';
-import 'package:cheque_stash/pages/transactions/edit_transaction_page.dart';
+import 'package:cheque_stash/pages/transactions/transactions_details_page.dart';
 import 'package:cheque_stash/state/state.dart';
 import 'package:cheque_stash/util/constants.dart';
 import 'package:cheque_stash/util/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:fort/fort.dart';
-import 'package:intl/intl.dart';
 
 enum TransactionType {
   income,
@@ -28,17 +28,9 @@ class TransactionTile extends StatelessWidget {
 
     return Card(
       child: InkWell(
-        onTap: () async {
-
-          final globalStore = StoreProvider.of<GlobalState>(context);
-
-          //Open transaction page
-          final newTransaction = await Navigator.of(context).to(EditTransactionPage(transaction: transaction, budgetMode: type == TransactionListType.budget,));
-
-          if(newTransaction != null && newTransaction != transaction){
-            // Edit transaction
-            globalStore.dispatch(editTransactionAction(newTransaction, inBudget: type == TransactionListType.budget));
-          }
+        onTap: () {
+          // Open transaction details
+          Navigator.of(context).to(TransactionDetailsPage(transaction: transaction, type: type,));
         },
         child: Column(
           children: [
@@ -46,31 +38,27 @@ class TransactionTile extends StatelessWidget {
             ListTile(
 
               minLeadingWidth: 50,
-              leading: Container(
-                height: 50,
-                width: 50,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Functions.transactionTypeColor(context, transactionType),
-                    width: 2
-                  )
-                ),
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(
-                    type == TransactionListType.budget ? transaction.date.formattedDay() : DateFormat('MMM dd\nyyyy').format(transaction.date),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
+              leading: TransactionDateCircle(
+                type: type, 
+                transaction: transaction
               ),
 
               title: Text(transaction.name),
               subtitle: Text(transaction.type),
 
-              trailing: const Icon(
+              trailing: type == TransactionListType.projected ? StoreConnector<GlobalState, bool>(
+                converter: (store) => !store.state.transactions.toMap((item) => item.id).containsKey(transaction.id),
+                builder: (context, canClone){
+                  return canClone ? ElevatedButton(
+                    child: const Text('Clone'),
+                    onPressed: (){
+                      Functions.cloneProjectedTransaction(context, transaction);
+                    },
+                  ) : const Icon(
+                    Icons.more_horiz
+                  );
+                }
+              ) : const Icon(
                 Icons.more_horiz
               ),
             ),
@@ -81,24 +69,8 @@ class TransactionTile extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   
-                  Container(
-                    height: 50,
-                    width: 100,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: Constants.DEFAULT_RADIUS,
-                      border: Border.all(
-                        color: Functions.transactionTypeColor(context, transactionType),
-                        width: 0.5
-                      )
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Text(
-                        transaction.fromAccount,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                  TransactionAccountCard(
+                    transaction: transaction,
                   ),
 
                   const SizedBox(width: Constants.MEDIUM_PADDING,),
@@ -120,21 +92,9 @@ class TransactionTile extends StatelessWidget {
                   
                   const SizedBox(width: Constants.MEDIUM_PADDING,),
 
-                  Container(
-                    height: 50,
-                    width: 100,
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: Constants.DEFAULT_RADIUS,
-                      color: Functions.transactionTypeColor(context, transactionType)
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Text(
-                        transaction.toAccount,
-                        style: TextStyle(fontSize: 18, color: Functions.onTransactionTypeColor(context, transactionType), fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                  TransactionAccountCard(
+                    to: true,
+                    transaction: transaction,
                   ),
 
                 ],
