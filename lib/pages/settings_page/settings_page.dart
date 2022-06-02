@@ -6,6 +6,7 @@ import 'package:cheque_stash/util/constants.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:fort/fort.dart';
+import 'package:intl/intl.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -22,6 +23,59 @@ class SettingsPage extends StatelessWidget {
       ),
       body: CustomScrollView(
         slivers: [
+
+          // Title
+          SliverPadding(
+            padding: const EdgeInsets.only(top: Constants.DEFAULT_PADDING, left: Constants.DEFAULT_PADDING),
+            sliver: SliverToBoxAdapter(
+              child: StoreConnector<GlobalState, DateTime>(
+                converter: (store) => store.state.startDate,
+                builder: (context, date) {
+                  return Text('Reset Start Date: ${DateFormat('EEE MMM dd, yyyy').format(date)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),);
+                }
+              ),
+            ),
+          ),
+
+          // Reset date data
+          SliverPadding(
+            padding: const EdgeInsets.only(top: Constants.MEDIUM_PADDING, left: Constants.LARGE_PADDING,),
+            sliver: SliverToBoxAdapter(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton(
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('Reset Start Date'),
+                  ),
+                  onPressed: () async {
+
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2050),
+                      helpText: "Select Start Date",
+                      cancelText: "CANCEL",
+                      confirmText: "SAVE"
+                    );
+
+                    if(date != null && date.isBefore(DateTime.now())){
+                      showDialog(context: context, builder: SimpleAlertDialog.build(
+                        title: 'Reset Start Date', 
+                        description: 'Resetting your start date will recompute your budget and remove all projected transactions.',
+                        continueColor: colorTheme.error,
+                        onContinue: (){
+                          globalStore.dispatch(resetStartDateAction(date));
+                        }
+                      ));
+                    }
+
+                  },
+                ),
+              )
+            ),
+          ),
 
           // Title
           const SliverPadding(

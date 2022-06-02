@@ -52,11 +52,11 @@ class Functions {
     final theme = Theme.of(context).colorScheme;
     switch (type) {
       case TransactionType.income:
-        return theme.primary;
+        return theme.primaryContainer;
       case TransactionType.transfer:
-        return theme.secondary;
+        return theme.secondaryContainer;
       default: // outgoing
-        return theme.error;
+        return theme.errorContainer;
     }
   }
 
@@ -64,11 +64,11 @@ class Functions {
     final theme = Theme.of(context).colorScheme;
     switch (type) {
       case TransactionType.income:
-        return theme.onPrimary;
+        return theme.onPrimaryContainer;
       case TransactionType.transfer:
-        return theme.onSecondary;
+        return theme.onSecondaryContainer;
       default: // outgoing
-        return theme.onError;
+        return theme.onErrorContainer;
     }
   }
 

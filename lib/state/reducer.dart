@@ -19,6 +19,7 @@ GlobalState _stateReducer(GlobalState state, dynamic event){
       themeFlexScheme: _themeFlexStateReducer(state, event),
       themeMode: _themeModeStateReducer(state, event),
       startDate: _startDateStateReducer(state, event),
+      lastComputedDate: _lastComputedDateStateReducer(state, event),
       accounts: _accountStateReducer(state, event),
       budget: _budgetStateReducer(state, event),
       transactions: _transactionStateReducer(state, event),
@@ -61,7 +62,20 @@ ThemeMode _themeModeStateReducer(GlobalState state, _GlobalStateEvent event){
 }
 
 DateTime _startDateStateReducer(GlobalState state, _GlobalStateEvent event){
+  if(event is _SetStartDateEvent){
+    return event.start;
+  }
   return state.startDate;
+}
+
+DateTime _lastComputedDateStateReducer(GlobalState state, _GlobalStateEvent event){
+  if(event is _SetStartDateEvent){
+    return event.start;
+  }
+  else if(event is _SetLastBudgetFromDateEvent){
+    return event.date;
+  }
+  return state.lastComputedDate;
 }
 
 List<Account> _accountStateReducer(GlobalState state, _GlobalStateEvent event){
@@ -72,7 +86,18 @@ List<Account> _accountStateReducer(GlobalState state, _GlobalStateEvent event){
 }
 
 List<Transaction> _budgetStateReducer(GlobalState state, _GlobalStateEvent event){
-  if(event is EditTransactionEvent && event.destination == _GlobalStateEvent.budget_destination){
+  if(event is AddTransactionEvent && event.destination == TransactionListType.budget){
+    // Map all the transactions
+    final transactions = state.budget.toMap<String>((t) => t.id);
+
+    // add transaction
+    transactions[event.transaction.id] = event.transaction;
+
+    //sort and return
+    final newTransactions = transactions.values.toList()..daySorted();
+    return newTransactions;
+  }
+  else if(event is EditTransactionEvent && event.destination == TransactionListType.budget){
     // Map all the transactions
     final transactions = state.budget.toMap<String>((t) => t.id);
 
@@ -81,11 +106,11 @@ List<Transaction> _budgetStateReducer(GlobalState state, _GlobalStateEvent event
       transactions[event.transaction.id] = event.transaction;
 
       //sort and return
-      final newTransactions = transactions.values.toList()..dateSorted();
+      final newTransactions = transactions.values.toList()..daySorted();
       return newTransactions;
     }
   }
-  else if(event is DeleteTransactionEvent && event.destination == _GlobalStateEvent.budget_destination){
+  else if(event is DeleteTransactionEvent && event.destination == TransactionListType.budget){
     // Map all the transactions
     final transactions = state.budget.toMap<String>((t) => t.id);
 
@@ -94,15 +119,31 @@ List<Transaction> _budgetStateReducer(GlobalState state, _GlobalStateEvent event
       transactions.remove(event.transactionID);
 
       //sort and return
-      final newTransactions = transactions.values.toList()..dateSorted();
+      final newTransactions = transactions.values.toList()..daySorted();
       return newTransactions;
     }
+  }
+  else if(event is BatchAddTransactionListEvent && event.destination == TransactionListType.budget){
+    // Map all the transactions
+    final transactions = state.budget.toMap<String>((t) => t.id);
+
+    // Add all
+    transactions.addAll(event.transactions.toMap<String>((t) => t.id));
+
+    //sort and return
+    final newTransactions = transactions.values.toList()..dateSorted();
+    return newTransactions;
   }
   return state.budget;
 }
 
 List<Transaction> _transactionStateReducer(GlobalState state, _GlobalStateEvent event){
-  if(event is ApproveTransactionEvent){
+  if(event is _SetStartDateEvent){
+    return [...state.projectedTransactions.where((element) => element.type == 'Initial Value')];
+  }
+
+
+  else if(event is AddTransactionEvent && event.destination == TransactionListType.transactions){
     // Map all the transactions
     final transactions = state.transactions.toMap<String>((t) => t.id);
 
@@ -113,7 +154,7 @@ List<Transaction> _transactionStateReducer(GlobalState state, _GlobalStateEvent 
     final newTransactions = transactions.values.toList()..dateSorted();
     return newTransactions;
   }
-  else if(event is EditTransactionEvent && event.destination == _GlobalStateEvent.transaction_destination){
+  else if(event is EditTransactionEvent && event.destination == TransactionListType.transactions){
     // Map all the transactions
     final transactions = state.transactions.toMap<String>((t) => t.id);
 
@@ -126,7 +167,7 @@ List<Transaction> _transactionStateReducer(GlobalState state, _GlobalStateEvent 
       return newTransactions;
     }
   }
-  else if(event is DeleteTransactionEvent && event.destination == _GlobalStateEvent.transaction_destination){
+  else if(event is DeleteTransactionEvent && event.destination == TransactionListType.transactions){
     // Map all the transactions
     final transactions = state.transactions.toMap<String>((t) => t.id);
 
@@ -138,12 +179,26 @@ List<Transaction> _transactionStateReducer(GlobalState state, _GlobalStateEvent 
       final newTransactions = transactions.values.toList()..dateSorted();
       return newTransactions;
     }
+  }
+  else if(event is BatchAddTransactionListEvent && event.destination == TransactionListType.transactions){
+    // Map all the transactions
+    final transactions = state.transactions.toMap<String>((t) => t.id);
+
+    // Add all
+    transactions.addAll(event.transactions.toMap<String>((t) => t.id));
+
+    //sort and return
+    final newTransactions = transactions.values.toList()..dateSorted();
+    return newTransactions;
   }
   return state.transactions;
 }
 
 List<Transaction> _projectedTransactionStateReducer(GlobalState state, _GlobalStateEvent event){
-  if(event is AddTransactionToProjectedEvent){
+  if(event is _SetStartDateEvent){
+    return [...state.projectedTransactions.where((element) => element.type == 'Initial Value')];
+  }
+  else if(event is AddTransactionEvent && event.destination == TransactionListType.projected){
     // Map all the transactions
     final transactions = state.projectedTransactions.toMap<String>((t) => t.id);
 
@@ -154,7 +209,7 @@ List<Transaction> _projectedTransactionStateReducer(GlobalState state, _GlobalSt
     final newTransactions = transactions.values.toList()..dateSorted();
     return newTransactions;
   }
-  else if(event is EditTransactionEvent && event.destination == _GlobalStateEvent.projected_destination){
+  else if(event is EditTransactionEvent && event.destination == TransactionListType.projected){
     // Map all the transactions
     final transactions = state.projectedTransactions.toMap<String>((t) => t.id);
 
@@ -167,7 +222,7 @@ List<Transaction> _projectedTransactionStateReducer(GlobalState state, _GlobalSt
       return newTransactions;
     }
   }
-  else if(event is DeleteTransactionEvent && event.destination == _GlobalStateEvent.projected_destination){
+  else if(event is DeleteTransactionEvent && event.destination == TransactionListType.projected){
     // Map all the transactions
     final transactions = state.projectedTransactions.toMap<String>((t) => t.id);
 
@@ -179,6 +234,17 @@ List<Transaction> _projectedTransactionStateReducer(GlobalState state, _GlobalSt
       final newTransactions = transactions.values.toList()..dateSorted();
       return newTransactions;
     }
+  }
+  else if(event is BatchAddTransactionListEvent && event.destination == TransactionListType.projected){
+    // Map all the transactions
+    final transactions = state.projectedTransactions.toMap<String>((t) => t.id);
+
+    // Add all
+    transactions.addAll(event.transactions.toMap<String>((t) => t.id));
+
+    //sort and return
+    final newTransactions = transactions.values.toList()..dateSorted();
+    return newTransactions;
   }
   return state.projectedTransactions;
 }

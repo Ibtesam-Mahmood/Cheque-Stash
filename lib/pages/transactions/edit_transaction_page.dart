@@ -14,8 +14,9 @@ import 'package:intl/intl.dart';
 class EditTransactionPage extends StatefulWidget {
 
   final Transaction? transaction;
+  final bool budgetMode;
 
-  const EditTransactionPage({Key? key, this.transaction}) : super(key: key);
+  const EditTransactionPage({Key? key, this.transaction, this.budgetMode = false}) : super(key: key);
 
   @override
   State<EditTransactionPage> createState() => _EditTransactionPageState();
@@ -28,13 +29,14 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
   late double amount = widget.transaction?.amount ?? 0.0;
   late String accountFrom = widget.transaction?.fromAccount ?? '';
   late String accountTo = widget.transaction?.toAccount ?? '';
-  late DateTime date = widget.transaction?.date ?? DateTime.now();
+  late DateTime? date = widget.transaction?.date ?? (widget.budgetMode ? null : DateTime.now());
 
   bool get canSave => name.isNotEmpty &&
     type != null &&
     amount > 0 &&
     (accountFrom.isNotEmpty == true || accountTo.isNotEmpty == true) &&
-    accountFrom != accountTo;
+    accountFrom != accountTo &&
+    date != null;
 
   void Function(String value) accountSelectorCallBack([bool to = false]) => (String newType) async {
     if(newType.isNotEmpty){
@@ -99,7 +101,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.transaction == null ? 'Create' : 'Edit'} Transaction'),
+        title: Text('${widget.transaction == null ? 'Create' : 'Edit'} ${widget.budgetMode ? 'Budget' : 'Transaction'}'),
         actions: [
           if(widget.transaction != null)
             IconButton(
@@ -115,7 +117,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                   continueColor: Theme.of(context).colorScheme.error,
                   onContinue: (){
                     //Delete transaction
-                    StoreProvider.of<GlobalState>(context).dispatch(deleteTransactionAction(widget.transaction!));
+                    StoreProvider.of<GlobalState>(context).dispatch(deleteTransactionAction(widget.transaction!, inBudget: widget.budgetMode));
                     Navigator.of(context).pop();
                   }
                 ));
@@ -184,7 +186,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                   const SizedBox(height: Constants.MEDIUM_PADDING,),
 
                   TextFormField(
-                    initialValue: amount.toString(),
+                    initialValue: amount > 0 ? amount.toString() : null,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'Amount',
@@ -303,6 +305,17 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                     }
                   ),
 
+/*
+ 
+                     ____        _       
+                    |  _ \  __ _| |_ ___ 
+                    | | | |/ _` | __/ _ \
+                    | |_| | (_| | ||  __/
+                    |____/ \__,_|\__\___|
+                                         
+ 
+*/
+
                   
                   const SizedBox(height: Constants.LARGE_PADDING,),
 
@@ -319,14 +332,16 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Text(
-                          DateFormat('EEE MMM dd, yyyy').format(date),
+                          date == null ? 'Select Day' : (
+                            widget.budgetMode ? date!.toBudgetDayFormat() : DateFormat('EEE MMM dd, yyyy').format(date!)
+                          ),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                       onPressed: () async {
-                        final newDate = await showDatePicker(
+                        final newDate = widget.budgetMode ? await BudgetDateAlertDialog.show(context: context) : await showDatePicker(
                           context: context,
-                          initialDate: date,
+                          initialDate: date!,
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2050),
                           helpText: "Select Transaction Date",
@@ -412,7 +427,7 @@ class _EditTransactionPageState extends State<EditTransactionPage> {
                 // Returns a transaction with no ID
                 final Transaction transaction = Transaction(
                   id: widget.transaction?.id ?? '', 
-                  date: date, 
+                  date: date!, 
                   amount: amount, 
                   name: name, 
                   type: type!, 

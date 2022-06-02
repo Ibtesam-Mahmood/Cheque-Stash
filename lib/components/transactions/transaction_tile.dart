@@ -17,13 +17,14 @@ enum TransactionType {
 class TransactionTile extends StatelessWidget {
 
   final Transaction transaction;
+  final TransactionListType type;
 
-  const TransactionTile({Key? key, required this.transaction}) : super(key: key);
+  const TransactionTile({Key? key, required this.transaction, this.type = TransactionListType.transactions}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
-    final type = Functions.transactionType(context, transaction);
+    final transactionType = Functions.transactionType(context, transaction);
 
     return Card(
       child: InkWell(
@@ -32,11 +33,11 @@ class TransactionTile extends StatelessWidget {
           final globalStore = StoreProvider.of<GlobalState>(context);
 
           //Open transaction page
-          final newTransaction = await Navigator.of(context).to(EditTransactionPage(transaction: transaction,));
+          final newTransaction = await Navigator.of(context).to(EditTransactionPage(transaction: transaction, budgetMode: type == TransactionListType.budget,));
 
           if(newTransaction != null && newTransaction != transaction){
             // Edit transaction
-            globalStore.dispatch(editTransactionAction(newTransaction));
+            globalStore.dispatch(editTransactionAction(newTransaction, inBudget: type == TransactionListType.budget));
           }
         },
         child: Column(
@@ -52,14 +53,14 @@ class TransactionTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Functions.transactionTypeColor(context, type),
+                    color: Functions.transactionTypeColor(context, transactionType),
                     width: 2
                   )
                 ),
                 child: FittedBox(
                   fit: BoxFit.contain,
                   child: Text(
-                    DateFormat('MMM dd\nyyyy').format(transaction.date),
+                    type == TransactionListType.budget ? transaction.date.formattedDay() : DateFormat('MMM dd\nyyyy').format(transaction.date),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -87,7 +88,7 @@ class TransactionTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: Constants.DEFAULT_RADIUS,
                       border: Border.all(
-                        color: Functions.transactionTypeColor(context, type),
+                        color: Functions.transactionTypeColor(context, transactionType),
                         width: 0.5
                       )
                     ),
@@ -125,13 +126,13 @@ class TransactionTile extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       borderRadius: Constants.DEFAULT_RADIUS,
-                      color: Functions.transactionTypeColor(context, type)
+                      color: Functions.transactionTypeColor(context, transactionType)
                     ),
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Text(
                         transaction.toAccount,
-                        style: TextStyle(fontSize: 18, color: Functions.onTransactionTypeColor(context, type), fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 18, color: Functions.onTransactionTypeColor(context, transactionType), fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),

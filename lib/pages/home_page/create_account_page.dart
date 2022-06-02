@@ -159,7 +159,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
             ElevatedButton(
               onPressed: uniqueAccount && type != null && initialValue >= 0 ? (){
-
+                
+                final globalStore = StoreProvider.of<GlobalState>(context);
                 final account = Account(
                   name: controller.text,
                   type: type!,
@@ -167,14 +168,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 );
 
                 //Create Account
-                StoreProvider.of<GlobalState>(context).dispatch(OpenAccountEvent(account));
+                globalStore.dispatch(OpenAccountEvent(account));
 
                 //Add transaction
                 if(initialValue > 0){
-                  StoreProvider.of<GlobalState>(context).dispatch(addTransactionAction(Transaction.create(
+                  globalStore.dispatch(addTransactionAction(Transaction.create(
                     name: 'Initial Value for ${account.name}',
                     amount: yourAccount ? initialValue : 0,
-                    date: DateTime.now(),
+                    date: globalStore.state.startDate,
                     fromAccount: '',
                     toAccount: account.name,
                     type: 'Initial Value'

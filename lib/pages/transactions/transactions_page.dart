@@ -45,12 +45,15 @@ class TransactionsPage extends StatelessWidget {
                 title: Text('All Transactions'),
               ),
       
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return TransactionTile(transaction: transactions[index]);
-                  },
-                  childCount: transactions.length
+              SliverPadding(
+                padding: const EdgeInsets.only(bottom: 100),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return TransactionTile(transaction: transactions[index]);
+                    },
+                    childCount: transactions.length
+                  ),
                 ),
               ),
             ],

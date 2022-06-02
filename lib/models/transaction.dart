@@ -132,6 +132,19 @@ extension TransactionListExtension on List<Transaction>{
 
   void dateSorted() => sort((a, b) => b.date.compareTo(a.date));
 
+  void daySorted() => sort((a, b) => b.date.day.compareTo(a.date.day));
+
+  Map<int, List<Transaction>> toBudgetMap(){
+    final Map<int, List<Transaction>> map = {};
+    for (var transaction in this) {
+      if(!map.containsKey(transaction.date.day)){
+        map[transaction.date.day] = [];
+      }
+      map[transaction.date.day]!.add(transaction);
+    }
+    return map;
+  }
+
   double getAccountValue(String account){
     double value = 0;
     for (var transaction in this) {

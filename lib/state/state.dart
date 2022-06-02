@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cheque_stash/models/account.dart';
 import 'package:cheque_stash/models/transaction.dart';
 import 'package:cheque_stash/util/extensions.dart';
@@ -6,6 +8,13 @@ import 'package:fort/fort.dart';
 
 part 'event.dart';
 part 'reducer.dart';
+
+
+enum TransactionListType {
+  budget,
+  transactions,
+  projected
+}
 
 class GlobalState extends FortState<GlobalState>{
 
@@ -25,6 +34,8 @@ class GlobalState extends FortState<GlobalState>{
 
   final DateTime startDate;
 
+  final DateTime lastComputedDate;
+
   GlobalState({
     required this.themeFlexScheme,
     required this.themeMode,
@@ -34,12 +45,14 @@ class GlobalState extends FortState<GlobalState>{
     required this.projectedTransactions,
     required this.savedTypes,
     required this.startDate,
+    required this.lastComputedDate,
   });
 
   factory GlobalState.initial() => GlobalState(
     themeFlexScheme: 0,
     themeMode: ThemeMode.system,
     startDate: DateTime.now(),
+    lastComputedDate: DateTime.now(),
     savedTypes: ['Initial Value'],
     accounts: [],
     budget: [],
@@ -57,6 +70,7 @@ class GlobalState extends FortState<GlobalState>{
       transactions: TransactionListExtension.fromJson(json['transactions']),
       projectedTransactions: TransactionListExtension.fromJson(json['projectedTransactions']),
       startDate: DateTime.fromMillisecondsSinceEpoch(json['startDate'] as int),
+      lastComputedDate: DateTime.fromMillisecondsSinceEpoch(json['lastComputedDate'] as int),
     );
   }
 
@@ -70,6 +84,7 @@ class GlobalState extends FortState<GlobalState>{
     'transactions': transactions.toJson(),
     'projectedTransactions': projectedTransactions.toJson(),
     'startDate': startDate.microsecondsSinceEpoch,
+    'lastComputedDate': lastComputedDate.microsecondsSinceEpoch,
   };
 
   @override
